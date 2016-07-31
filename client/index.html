@@ -1,0 +1,46 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="libs/jquery.knob.min.js"></script>
+    <script type="text/javascript" src="SoundPlayer.js"></script>
+    <script type="text/javascript" src="MIDIIO.js"></script>
+    <script type="text/javascript" src="App.js"></script>
+
+    <script type="text/javascript">
+        var app = new App();
+        window.onload = function() {
+            app.onload();
+        };
+    </script>
+</head>
+<body>
+<h1>Trend Sampler</h1>
+
+<table align="center" cellpadding="10">
+<tr>
+    <td><button id="startButton" style="width: 100px; height: 60px; font-size: 16pt;">START</button></td>
+    <td><button id="stopButton" style="width: 100px; height: 60px; font-size: 16pt;">STOP</button></td>
+    <td valign="middle"><font size="6">BPM</font><input type="text" id="bpm" value="120" style="width: 3em; font-size: 24pt;"></td>
+    <td><button id="tapButton" style="width: 70px; height: 30px;">TAP</button></td>
+    <td><input type="checkbox" id="extsync" size="20"> MIDI Clock Sync</td>
+</tr>
+</table>
+
+<p>
+
+<table id="seq" cellpadding="0" cellspacing="0">
+<tr>
+    <td align="center"></td>
+    <td align="center" colspan=16></td>
+    <td align="center">Pitch</td>
+    <td align="center">Delay</td>
+    <td align="center">Offset</td>
+    <td align="center">Voice</td>
+</tr>
+</table>
+
+
+</body>
+</html>
