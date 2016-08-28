@@ -2,6 +2,11 @@ const stepIndicatorColorOn  = '#FF4646';
 const stepIndicatorColorOff = 'transparent';
 const stepOnColor = 'mediumseagreen';
 
+//const voicesURI = '/api/voices';
+//const soundsURI = '/api/sounds'
+const voicesURI = 'voices.json';
+const soundsURI = 'sounds.json'
+
 // ユーティリティ関数
 function loadAudioBuffer(url, callback) {
     var request = new XMLHttpRequest();
@@ -17,7 +22,7 @@ function loadAudioBuffer(url, callback) {
 
 function loadTreands(callback) {
     var request = new XMLHttpRequest();
-    request.open('GET', '/api/sounds', true);
+    request.open('GET', soundsURI, true);
     request.responseType = 'json';
 
     request.onload = function() {
@@ -29,7 +34,7 @@ function loadTreands(callback) {
 
 function loadVoices(callback) {
     var request = new XMLHttpRequest();
-    request.open('GET', '/api/voices', true);
+    request.open('GET', voicesURI, true);
     request.responseType = 'json';
 
     request.onload = function() {
@@ -176,9 +181,9 @@ App.prototype.createView = function(trends, voices) {
         var voice = $(event.target).val();
 
         loadAudioBuffer("sounds/" + (track + 1) + "_" + voice + ".wav",
-                            function(buffer) {
-                                soundPlayer.setAudioBuffer(track, buffer);
-                            });
+                                function(buffer) {
+                                    soundPlayer.setAudioBuffer(track, buffer);
+                                });
 
     }.bind(this));
 };
@@ -251,9 +256,9 @@ App.prototype.onload = function() {
                 // load audio stream
                 (function(track) {
                     loadAudioBuffer("sounds/" + (track + 1) + "_" + voices[0] + ".wav",
-                                        function(buffer) {
-                                            soundPlayer.setAudioBuffer(track, buffer);
-                                        });
+                                            function(buffer) {
+                                                soundPlayer.setAudioBuffer(track, buffer);
+                                            });
                  }.bind(this))(track);
             }
 
