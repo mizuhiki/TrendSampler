@@ -2,46 +2,52 @@ const stepIndicatorColorOn  = '#FF4646';
 const stepIndicatorColorOff = 'transparent';
 const stepOnColor = 'mediumseagreen';
 
-//const voicesURI = '/api/voices';
-//const soundsURI = '/api/sounds'
-const voicesURI = 'voices.json';
-const soundsURI = 'sounds.json'
+const voicesURI = '/api/voices';
+const soundsURI = '/api/sounds'
+//const voicesURI = 'voices.json';
+//const soundsURI = 'sounds.json'
 
 // ユーティリティ関数
-function loadAudioBuffer(url, callback) {
-    var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.responseType = 'arraybuffer';
+function loadAudioBuffer(url) {
+    return new Promise(function(resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
 
-    request.onload = function() {
-        callback(request.response);
-    };
+        request.onload = function() {
+            resolve(request.response);
+        };
 
-    request.send();
+        request.send();
+    });
 }
 
-function loadTreands(callback) {
-    var request = new XMLHttpRequest();
-    request.open('GET', soundsURI, true);
-    request.responseType = 'json';
+function loadSounds() {
+    return new Promise(function(resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open('GET', soundsURI, true);
+        request.responseType = 'json';
 
-    request.onload = function() {
-        callback(request.response);
-    };
+        request.onload = function() {
+            resolve(request.response);
+        };
 
-    request.send();
+        request.send();
+    });
 }
 
-function loadVoices(callback) {
-    var request = new XMLHttpRequest();
-    request.open('GET', voicesURI, true);
-    request.responseType = 'json';
+function loadVoices() {
+    return new Promise(function(resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open('GET', voicesURI, true);
+        request.responseType = 'json';
 
-    request.onload = function() {
-        callback(request.response);
-    };
+        request.onload = function() {
+            resolve(request.response);
+        };
 
-    request.send();
+        request.send();
+    });
 }
 
 
@@ -180,11 +186,10 @@ App.prototype.createView = function(trends, voices) {
         var track = Number($(event.target).attr("id").substring(5)); // "voice" の文字列を取り除く
         var voice = $(event.target).val();
 
-        loadAudioBuffer("sounds/" + (track + 1) + "_" + voice + ".wav",
-                                function(buffer) {
-                                    soundPlayer.setAudioBuffer(track, buffer);
-                                });
-
+        loadAudioBuffer("sounds/" + (track + 1) + "_" + voice + ".wav")
+            .then(function(buffer) {
+                soundPlayer.setAudioBuffer(track, buffer);
+            }, function() { /* ERROR: failure to load audio buffer */});
     }.bind(this));
 };
 
@@ -247,23 +252,35 @@ App.prototype.onload = function() {
 
 
     // トレンドデータ及びボイスの一覧をサーバへリクエストする
-    loadTreands(function(trends) {
-        loadVoices(function(voices) {
-            this.createView(trends, voices);
+    var _sounds = null;
+    var _voices = null;
 
-            // 初期音声をロードする
-            for (var track = 0; track < SEQ_TRACKS; track++) {
-                // load audio stream
-                (function(track) {
-                    loadAudioBuffer("sounds/" + (track + 1) + "_" + voices[0] + ".wav",
-                                            function(buffer) {
-                                                soundPlayer.setAudioBuffer(track, buffer);
-                                            });
-                 }.bind(this))(track);
+    // トレンドデータ一覧を取得
+    loadSounds()
+        .then(function(sounds) {
+            _sounds = sounds;
+            // ボイス一覧を取得
+            return loadVoices();
+        }, function() { /* ERROR: failure to laod sounds */ })
+        .then(function(voices) {
+            _voices = voices;
+            this.createView(_sounds, _voices);
+
+            // 初期設定の音声データを全トラック分読み込む
+            function loop(track) {
+                loadAudioBuffer("sounds/" + (track + 1) + "_" + _voices[0] + ".wav")
+                    .then(function(buffer) {
+                        soundPlayer.setAudioBuffer(track, buffer);
+
+                        if (track < SEQ_TRACKS) {
+                            setTimeout(function() {
+                                loop(track + 1);
+                            }, 100);
+                        }
+                    }, function() { /* ERROR: failure to load audio buffer */ });
             }
-
-        }.bind(this));
-    }.bind(this));
+            loop(0);
+        }.bind(this), function() { /* ERROR: failure to load voices */ });
 
     // UI のハンドラ
     $("#startButton").on('click', function() {
