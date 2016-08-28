@@ -171,16 +171,16 @@ App.prototype.createView = function(trends, voices) {
                     }
                 });
 
-    $(".voice").on('change', function() {
-        var track = Number($(this).attr("id").substring(5)); // "voice" の文字列を取り除く
-        var voice = $(this).val();
+    $(".voice").on('change', function(event) {
+        var track = Number($(event.target).attr("id").substring(5)); // "voice" の文字列を取り除く
+        var voice = $(event.target).val();
 
         loadAudioBuffer("sounds/" + (track + 1) + "_" + voice + ".wav",
                             function(buffer) {
                                 soundPlayer.setAudioBuffer(track, buffer);
                             });
 
-    });
+    }.bind(this));
 };
 
 App.prototype.blinkTrack = function(track) {
@@ -254,7 +254,7 @@ App.prototype.onload = function() {
                                         function(buffer) {
                                             soundPlayer.setAudioBuffer(track, buffer);
                                         });
-                 })(track);
+                 }.bind(this))(track);
             }
 
         }.bind(this));
