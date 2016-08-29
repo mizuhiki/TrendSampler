@@ -4,10 +4,12 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script type="text/javascript" src="libs/jquery.knob.min.js"></script>
+
     <script type="text/javascript" src="SoundPlayer.js"></script>
     <script type="text/javascript" src="MIDIIO.js"></script>
     <script type="text/javascript" src="App.js"></script>
 
+    <link rel="stylesheet" href="index.css">
     <script type="text/javascript">
         var app = new App();
         window.onload = function() {
@@ -18,15 +20,15 @@
 <body>
 <h1>Trend Sampler</h1>
 
-<table align="center" cellpadding="10">
-<tr>
-    <td><button id="startButton" style="width: 100px; height: 60px; font-size: 16pt;">START</button></td>
-    <td><button id="stopButton" style="width: 100px; height: 60px; font-size: 16pt;">STOP</button></td>
-    <td valign="middle"><font size="6">BPM</font><input type="text" id="bpm" value="120" style="width: 3em; font-size: 24pt;"></td>
-    <td><button id="tapButton" style="width: 70px; height: 30px;">TAP</button></td>
-    <td><input type="checkbox" id="extsync" size="20"> MIDI Clock Sync</td>
-</tr>
-</table>
+<div style="height: 100px; vertical-align: middle; display: table-cell; border: solid 10px white;">
+    <button id="startButton" class="transportButton">START</button>
+    <button id="stopButton" class="transportButton">STOP</button>
+    <span style="margin: 20px;"></span>
+    <span style="vertical-align: middle; font-size: 18pt;">BPM</span>
+    <input type="text" id="bpm" class="bpmInput" value="120">
+    <button id="tapButton" class="transportButton">TAP</button>
+    <input type="checkbox" id="extsync"><label for="extsync">MIDI Clock Sync</label>
+</div>
 
 <p>
 
@@ -40,7 +42,6 @@
     <td align="center">Voice</td>
 </tr>
 </table>
-
 
 </body>
 </html>

@@ -1,0 +1,15 @@
+.transportButton {
+    width: 100px;
+    height: 60px;
+    font-size: 16pt;
+    margin: 10px;
+    vertical-align: middle;
+}
+
+.bpmInput {
+    height: 60px;
+    width: 3em;
+    font-size: 24pt;
+    vertical-align: middle;
+    text-align: center;
+}
