@@ -7,7 +7,9 @@ const soundsURI = '/api/sounds'
 //const voicesURI = 'voices.json';
 //const soundsURI = 'sounds.json'
 
-// ユーティリティ関数
+//
+// utility functions
+//
 function loadAudioBuffer(url) {
     return new Promise(function(resolve, reject) {
         var request = new XMLHttpRequest();
@@ -55,7 +57,9 @@ function fix2(value) {
     return ("0" + value).slice(-2);
 }
 
-// アプリケーションクラス
+//
+// Application class
+//
 var App = function() {
     this._soundPlayer = null;
     this._midiIO = null;
@@ -199,16 +203,18 @@ App.prototype.blinkTrack = function(track) {
 };
 
 App.prototype.onload = function() {
-    // MIDI 入出力用クラスをセットアップ
+    //
+    // Initialize MIDIIO class
+    //
     var onStepCallback = function() {
-        // クロックを受けてステップが進んだ時に呼び出されるコールバック
+        // callback when sequencer step advances
         if (this._midiClockSync === true) {
             this._soundPlayer.incStep();
         }
     }.bind(this);
 
     var onReceivedStartCallback = function() {
-        // START を受信した時に呼び出されるコールバック
+        // callback when receiving MIDI realtime message START(0xFA)
         if (this._midiClockSync === true) {
             this._soundPlayer.rewindSeq();
             this._soundPlayer.playCurrentStep();
@@ -217,7 +223,8 @@ App.prototype.onload = function() {
 
     var noteNoForTrack = [ 48, 50, 52, 53, 55, 57, 59, 60 ];
     var onReceivedNoteOnCallback = function(statusByte, noteNo, velocity) {
-        // MIDI 入力があったら、対応するトラックを再生する
+        // callback when receiving MIDI Note On
+        // play the track coressponds to the node number
         for (var track = 0; track < SEQ_TRACKS; track++) {
             if (noteNoForTrack[track] == noteNo) {
                 this._soundPlayer.auditionTrack(track);
@@ -229,12 +236,13 @@ App.prototype.onload = function() {
 
     this._midiIO = new MIDIIO(onStepCallback, onReceivedStartCallback, onReceivedNoteOnCallback);
 
-    // サウンド再生エンジンをセットアップ
+    //
+    // setup sound playing engine
+    //
     var onUpdateStepCallback = function(prevStep, curStep) {
-        // ステップが増えた時に呼び出されるコールバック
+        // callback when step advances
         this.setStepColor(prevStep, stepIndicatorColorOff);
         this.setStepColor(curStep , stepIndicatorColorOn);
-
 
         for (var track = 0; track < SEQ_TRACKS; track++) {
             if (this._soundPlayer.step(track, curStep) === true) {
@@ -247,26 +255,32 @@ App.prototype.onload = function() {
     var soundPlayer = new SoundPlayer(onUpdateStepCallback);
     this._soundPlayer = soundPlayer;
 
-    // デフォルトの BPM を設定
+    // set default BPM
     soundPlayer.setBpm(120);
 
-
-    // トレンドデータ及びボイスの一覧をサーバへリクエストする
+    //
+    // request trend words and voice list to server
+    //
     var _sounds = null;
     var _voices = null;
 
-    // トレンドデータ一覧を取得
+    // request trend words
     loadSounds()
         .then(function(sounds) {
+            // request trend words succeeded
             _sounds = sounds;
-            // ボイス一覧を取得
+
+            // NEXT: request voice list
             return loadVoices();
         }, function() { /* ERROR: failure to laod sounds */ })
         .then(function(voices) {
+            // request voice list succeeded
             _voices = voices;
+
+            // NEXT: create step sequencer view
             this.createView(_sounds, _voices);
 
-            // 初期設定の音声データを全トラック分読み込む
+            // request audio waveform for all tracks to server
             function loop(track) {
                 loadAudioBuffer("sounds/" + (track + 1) + "_" + _voices[0] + ".wav")
                     .then(function(buffer) {
@@ -282,7 +296,10 @@ App.prototype.onload = function() {
             loop(0);
         }.bind(this), function() { /* ERROR: failure to load voices */ });
 
-    // UI のハンドラ
+
+    //
+    // UI handlers
+    //
     $("#startButton").on('click', function() {
         soundPlayer.startSeq();
     });
@@ -302,7 +319,7 @@ App.prototype.onload = function() {
             // Reset clock counter when turn MIDI Clock sync checkbox on
             soundPlayer.stopSeq();
         } else {
-            // クロックシンクを止めた時は、BPM=120 へ戻す
+            // reset BPM value when disabled clock syncing
             $("#bpm").val(120);
             this._soundPlayer.setBpm(120);
         }
@@ -322,7 +339,10 @@ App.prototype.onload = function() {
 
     }.bind(this));
 
-    // MIDI クロックから推定されるテンポを画面上で更新するタイマ
+    //
+    // the timer for updating estimated BPM value from MIDI clock
+    // while the app is in MIDI clock sync mode
+    //
     setInterval(function() {
         if (this._midiClockSync === true) {
             var bpm = this._midiIO.estimatedBPM();
